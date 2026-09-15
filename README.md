@@ -185,6 +185,42 @@ PHP 8.1 or newer with `pdo_sqlite` (or `pdo_mysql`) and `mbstring`. That is all.
 
 ---
 
+## Deploying to Hostinger
+
+The repository ships a GitHub Actions pipeline that runs the test suite on
+PHP 8.1–8.4 and, only if it passes, uploads to Hostinger over FTPS.
+
+Add four repository secrets (**Settings → Secrets and variables → Actions**)
+taken from hPanel → **Files** → **FTP Accounts**:
+
+| Secret | Value |
+|---|---|
+| `FTP_SERVER` | e.g. `ftp.yourdomain.com` |
+| `FTP_USERNAME` | e.g. `u123456789.deploy` |
+| `FTP_PASSWORD` | that account's password |
+| `FTP_SERVER_DIR` | usually `public_html/` — keep the trailing slash |
+
+Then push. Hostinger's own hPanel → **Advanced** → **GIT** integration works
+too and is described in the guide, though it runs no tests before publishing.
+
+Two things the deploy deliberately never touches, so an update can never
+destroy your books or your credentials:
+
+```
+storage/**   the SQLite database, exports and logs
+config.php   database credentials and app key
+```
+
+Both are created once on the server. `deploy/config.production.php` is the
+template, and `php deploy/preflight.php` checks the install is actually safe to
+go live — PHP version, debug off, a real app key, writable storage and the
+directory guards.
+
+**Full instructions, including the document-root setting that keeps your
+database off the public web, are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).**
+
+---
+
 ## Running the tests
 
 ```bash

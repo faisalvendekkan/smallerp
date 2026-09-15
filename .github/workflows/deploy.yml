@@ -1,0 +1,100 @@
+name: Deploy to Hostinger
+
+# Ships the app to Hostinger over FTPS whenever the default branch moves,
+# but only once the test suite is green.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#
+#   FTP_SERVER      your FTP hostname from hPanel, e.g. ftp.yourdomain.com
+#   FTP_USERNAME    the FTP account username, e.g. u123456789.deploy
+#   FTP_PASSWORD    that account's password
+#   FTP_SERVER_DIR  the target directory, with a trailing slash.
+#                   Usually  public_html/   (or  domains/yourdomain.com/public_html/ )
+#
+# See docs/DEPLOYMENT.md for how to find each of these.
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - claude/keen-ride-gsrh0b
+  workflow_dispatch:       # lets you deploy by hand from the Actions tab
+
+concurrency:
+  # Never let two deploys write to the same account at once.
+  group: hostinger-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
+
+  deploy:
+    name: Upload to Hostinger
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm the FTP secrets are set
+        env:
+          SERVER: ${{ secrets.FTP_SERVER }}
+          USERNAME: ${{ secrets.FTP_USERNAME }}
+          PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          missing=""
+          [ -z "$SERVER" ]   && missing="$missing FTP_SERVER"
+          [ -z "$USERNAME" ] && missing="$missing FTP_USERNAME"
+          [ -z "$PASSWORD" ] && missing="$missing FTP_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secrets:$missing"
+            echo "Add them under Settings -> Secrets and variables -> Actions."
+            echo "See docs/DEPLOYMENT.md."
+            exit 1
+          fi
+          echo "All FTP secrets are present."
+
+      - name: Deploy over FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR || 'public_html/' }}
+          protocol: ftps
+          # Incremental sync: only changed files move, and the state file on
+          # the server records what this workflow put there.
+          dangerous-clean-slate: false
+          # Everything below is either not wanted on a live server or, in the
+          # case of storage/ and config.php, must NEVER be touched by a deploy:
+          # storage/ holds the SQLite database and config.php holds the
+          # credentials. Excluded paths are neither uploaded nor deleted.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            storage/**
+            config.php
+            **/*.sqlite
+            **/*.sqlite-wal
+            **/*.sqlite-shm
+            tests/**
+            docs/**
+            deploy/**
+            **/.DS_Store
+            **/node_modules/**
+            README.md
+
+      - name: What to check now
+        run: |
+          echo "Deployed. Verify:"
+          echo "  1. https://<your domain>/          loads the sign-in page"
+          echo "  2. https://<your domain>/app/      returns 403, not a file listing"
+          echo "  3. https://<your domain>/storage/  returns 403"
+          echo "See the post-deploy checklist in docs/DEPLOYMENT.md."
