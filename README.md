@@ -9,16 +9,22 @@ It is written in plain PHP 8.1+ with **no Composer dependencies and no build
 step**, because it has to deploy the way these companies actually deploy
 software — by uploading a folder to a cPanel account.
 
-```
-git clone <this repo> smallerp
+```bash
+git clone https://github.com/faisalvendekkan/smallerp.git
 cd smallerp
-php -S localhost:8000 -t public
+./start.sh          # Windows: start.bat
 ```
 
-Open <http://localhost:8000>, and the installer will create the database and
-your administrator account. Tick "load demo data" to get a worked example: a
-Doha trading and maintenance company with a quarter of trading, six employees
-and a completed payroll run.
+That is the whole installation. The launcher checks your PHP version and
+extensions, picks a free port, and prints the address. Open it, and the
+installer will create the database and your administrator account.
+
+Tick **load demo data** to get a worked example: a Doha trading and maintenance
+company with a quarter of trading, six employees and a completed payroll run.
+Leave it unticked if these are going to be your real books.
+
+If you would rather not use the launcher, `php -S localhost:8000 -t public`
+does the same thing.
 
 ---
 
@@ -182,6 +188,16 @@ concurrent users.
 ### Requirements
 
 PHP 8.1 or newer with `pdo_sqlite` (or `pdo_mysql`) and `mbstring`. That is all.
+
+```bash
+# macOS
+brew install php
+# Ubuntu / Debian
+sudo apt install php-cli php-sqlite3 php-mbstring
+# Windows: https://windows.php.net/download, then add the folder to PATH
+```
+
+`./start.sh` checks all of this for you and says which piece is missing.
 
 ---
 
