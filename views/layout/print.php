@@ -19,7 +19,7 @@ use App\Core\Lang;
 <body>
 <div class="print-bar no-print">
     <a class="btn" href="<?= e($backUrl ?? url('/')) ?>">← <?= t('action.back') ?></a>
-    <button class="btn btn--primary" type="button" onclick="window.print()"><?= t('action.print') ?></button>
+    <button class="btn btn--primary" type="button" data-print><?= t('action.print') ?></button>
 </div>
 <?= $content ?>
 </body>

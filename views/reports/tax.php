@@ -11,7 +11,7 @@
         <p class="page-head__sub"><?= e(fdate($from)) ?> to <?= e(fdate($to)) ?></p>
     </div>
     <div class="page-head__actions">
-        <button class="btn" type="button" onclick="window.print()"><?= t('action.print') ?></button>
+        <button class="btn" type="button" data-print><?= t('action.print') ?></button>
     </div>
 </div>
 

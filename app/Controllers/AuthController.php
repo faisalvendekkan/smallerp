@@ -54,8 +54,6 @@ final class AuthController extends Controller
             \App\Core\Database::update('users', ['locale' => $locale], ['id' => Auth::id()]);
         }
 
-        $back = $_SERVER['HTTP_REFERER'] ?? url('/');
-
-        return Response::redirect($back);
+        return Response::redirect(url($request->backUrl('/')));
     }
 }

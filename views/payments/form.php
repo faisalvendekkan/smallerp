@@ -24,8 +24,8 @@ $isIn = $direction === Payments::IN;
                         <?= $isIn ? t('field.customer') : t('field.supplier') ?>
                     </label>
                     <select id="contact_id" name="contact_id" required
-                            onchange="this.form.action='<?= url($isIn ? '/receipts/new' : '/payments/new') ?>';
-                                      this.form.method='get'; this.form.submit();">
+                            data-reload-form
+                            data-reload-action="<?= e(url($isIn ? '/receipts/new' : '/payments/new')) ?>">
                         <option value="">— choose —</option>
                         <?php foreach ($contacts as $contact): ?>
                             <option value="<?= (int) $contact['id'] ?>"

@@ -22,7 +22,7 @@ $critical = array_filter($rows, static fn ($r) => $r['level'] === 'critical');
         <a class="btn" href="<?= url('/reports/expiries', ['within' => $withinDays, 'format' => 'csv']) ?>">
             <?= t('action.export') ?>
         </a>
-        <button class="btn" type="button" onclick="window.print()"><?= t('action.print') ?></button>
+        <button class="btn" type="button" data-print><?= t('action.print') ?></button>
     </div>
 </div>
 

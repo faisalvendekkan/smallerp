@@ -131,15 +131,18 @@ final class Auth
         $hash = $user['password_hash'] ?? '$2y$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv';
         $passwordOk = password_verify($password, $hash);
 
-        if ($user && (int) $user['is_active'] !== 1) {
-            throw new ValidationException('This account has been deactivated. Ask an administrator to re-enable it.');
-        }
-
         if ($user && self::isLockedOut($user)) {
             throw new ValidationException(sprintf(
                 'Too many failed attempts. Try again in %d minutes.',
                 self::LOCKOUT_MINUTES
             ));
+        }
+
+        // Only confirm that an account is deactivated once the password has
+        // been proved: saying so earlier would let anyone probe the login form
+        // to discover which usernames exist.
+        if ($user && $passwordOk && (int) $user['is_active'] !== 1) {
+            throw new ValidationException('This account has been deactivated. Ask an administrator to re-enable it.');
         }
 
         if (!$user || !$passwordOk) {

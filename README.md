@@ -228,10 +228,11 @@ php tests/run.php          # everything
 php tests/run.php Wps      # just the WPS suite
 ```
 
-278 assertions covering money arithmetic and rounding, Qatari identifier
+331 assertions covering money arithmetic and rounding, Qatari identifier
 validation, gratuity and leave under the Labour Law, SIF generation and
-validation, the ledger's balancing rules, and the invoice → stock → payment
-cycle end to end.
+validation, the ledger's balancing rules, the invoice → stock → payment cycle
+end to end, and a security suite guarding the findings from the pre-launch
+review (open redirect, login enumeration, role separation, output encoding).
 
 The harness is 200 lines of plain PHP for the same reason the app has no
 framework: the tests should run wherever the application does.

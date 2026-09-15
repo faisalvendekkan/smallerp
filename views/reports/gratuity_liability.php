@@ -13,7 +13,7 @@ use App\Core\Lang;
         <a class="btn" href="<?= url('/reports/gratuity-liability', ['format' => 'csv']) ?>">
             <?= t('action.export') ?>
         </a>
-        <button class="btn" type="button" onclick="window.print()"><?= t('action.print') ?></button>
+        <button class="btn" type="button" data-print><?= t('action.print') ?></button>
     </div>
 </div>
 

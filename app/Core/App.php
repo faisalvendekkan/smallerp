@@ -164,9 +164,7 @@ final class App
         );
         View::flashInput($request->all());
 
-        $back = $_SERVER['HTTP_REFERER'] ?? url('/');
-
-        return Response::redirect($back);
+        return Response::redirect(url($request->backUrl('/')));
     }
 
     private static function renderError(int $status, string $message, Request $request): Response

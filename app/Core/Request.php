@@ -260,6 +260,48 @@ final class Request
             || ($this->server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
     }
 
+    /**
+     * A safe "go back where you came from" target.
+     *
+     * The Referer header is supplied by the client, so putting it straight
+     * into a Location header is an open redirect: a link on someone else's
+     * site could bounce a user from your domain to a copy of the sign-in page.
+     * Only the path and query of a same-host referer are honoured; anything
+     * else falls back.
+     */
+    public function backUrl(string $fallback = '/'): string
+    {
+        $referer = trim((string) ($this->server['HTTP_REFERER'] ?? ''));
+        if ($referer === '') {
+            return $fallback;
+        }
+
+        $parts = parse_url($referer);
+        if ($parts === false) {
+            return $fallback;
+        }
+
+        // A referer naming any other host is not ours to redirect to. This
+        // also catches the protocol-relative "//evil.com" form, which
+        // parse_url() reports as a host.
+        //
+        // Compare hostnames only: parse_url() splits the port out, while
+        // HTTP_HOST keeps it, so "127.0.0.1" and "127.0.0.1:8000" are the same
+        // machine and must not be treated as a cross-host redirect.
+        $host = (string) ($parts['host'] ?? '');
+        $ourHost = preg_replace('/:\d+$/', '', (string) ($this->server['HTTP_HOST'] ?? '')) ?? '';
+        if ($host !== '' && ($ourHost === '' || strcasecmp($host, $ourHost) !== 0)) {
+            return $fallback;
+        }
+
+        $path = (string) ($parts['path'] ?? '');
+        if ($path === '' || !str_starts_with($path, '/') || str_starts_with($path, '//')) {
+            return $fallback;
+        }
+
+        return $path . (isset($parts['query']) ? '?' . $parts['query'] : '');
+    }
+
     /** Base path the app is served from, for building URLs in views. */
     public function basePath(): string
     {

@@ -8,7 +8,7 @@ use App\Core\Lang;
         <p class="page-head__sub">as at <?= e(fdate($asOf)) ?></p>
     </div>
     <div class="page-head__actions">
-        <button class="btn" type="button" onclick="window.print()"><?= t('action.print') ?></button>
+        <button class="btn" type="button" data-print><?= t('action.print') ?></button>
     </div>
 </div>
 

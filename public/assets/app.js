@@ -32,6 +32,21 @@
         return (negative ? '-' : '') + whole + '.' + cents;
     }
 
+    /**
+     * The item catalogue arrives as a `type="application/json"` block rather
+     * than an inline script, because the page's Content Security Policy
+     * forbids inline scripts. A JSON block is inert data, so it is allowed.
+     */
+    function readItemCatalogue() {
+        var el = document.getElementById('item-catalogue');
+        if (!el) { return {}; }
+        try {
+            return JSON.parse(el.textContent) || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
     // ------------------------------------------------------------------
     // Mobile navigation
     // ------------------------------------------------------------------
@@ -68,7 +83,7 @@
         var tbody = editor.querySelector('tbody');
         var template = document.getElementById('line-template');
         var addButton = editor.querySelector('[data-add-line]');
-        var catalogue = window.SMALLERP_ITEMS || {};
+        var catalogue = readItemCatalogue();
         var pricesIncludeTax = editor.getAttribute('data-prices-include-tax') === '1';
 
         function rows() {
@@ -322,7 +337,33 @@
         });
     }
 
+    /**
+     * Print buttons and the "reload this form" selects used to carry inline
+     * onclick/onchange attributes. The Content Security Policy blocks those,
+     * so the behaviour is declared with data attributes and bound here.
+     */
+    function initDeclarativeActions() {
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('[data-print]')) {
+                e.preventDefault();
+                window.print();
+            }
+        });
+
+        document.querySelectorAll('[data-reload-form]').forEach(function (field) {
+            field.addEventListener('change', function () {
+                var form = field.form;
+                if (!form) { return; }
+                var action = field.getAttribute('data-reload-action');
+                if (action) { form.action = action; }
+                form.method = 'get';
+                form.submit();
+            });
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
+        initDeclarativeActions();
         initNav();
         initLineEditor();
         initAllocation();

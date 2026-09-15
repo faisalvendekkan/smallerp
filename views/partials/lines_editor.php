@@ -172,4 +172,11 @@ $columns = 6 + ($showTax ? 1 : 0) + ($accounts !== null ? 1 : 0);
     </tr>
 </template>
 
-<script>window.SMALLERP_ITEMS = <?= $itemsJson ?>;</script>
+<?php
+/*
+ * The catalogue travels as a JSON data block rather than an inline script.
+ * A `type="application/json"` block is data, not code, so the Content Security
+ * Policy does not have to allow inline scripts for the line editor to work.
+ */
+?>
+<script type="application/json" id="item-catalogue"><?= $itemsJson ?></script>
