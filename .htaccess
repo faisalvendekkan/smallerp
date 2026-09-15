@@ -1,0 +1,8 @@
+# If the document root could not be pointed at /public (common on basic shared
+# hosting), this forwards requests into it and keeps app code unreachable.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(app|database|storage|views|tests)/ - [F,L]
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
